@@ -41,7 +41,7 @@ def validate_filename(filename: str) -> None:
         raise ValidationError("Filename cannot be all spaces")
 
     if INVALID_FILENAME_PATTERN.search(filename):
-        raise ValidationError(f'Filename cannot contain any of these characters: {INVALID_FILENAME_CHARS}')
+        raise ValidationError(f"Filename cannot contain any of these characters: {INVALID_FILENAME_CHARS}")
 
 
 def validate_file_size(file_path: str | Path) -> None:

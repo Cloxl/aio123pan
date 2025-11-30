@@ -98,11 +98,8 @@ class TokenStorage:
         with open(self.env_file, encoding="utf-8") as f:
             for line in f:
                 stripped = line.strip()
-                if not stripped.startswith(f"{self.TOKEN_KEY}=") and not stripped.startswith(
-                    f"{self.EXPIRY_KEY}="
-                ):
+                if not stripped.startswith(f"{self.TOKEN_KEY}=") and not stripped.startswith(f"{self.EXPIRY_KEY}="):
                     lines.append(line)
 
         with open(self.env_file, "w", encoding="utf-8") as f:
             f.writelines(lines)
-

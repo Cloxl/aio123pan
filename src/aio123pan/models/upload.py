@@ -1,6 +1,5 @@
 """Data models for upload operations."""
 
-
 from pydantic import BaseModel, ConfigDict, Field
 
 

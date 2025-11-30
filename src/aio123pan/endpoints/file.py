@@ -165,9 +165,7 @@ class FileEndpoint:
         Returns:
             New file ID
         """
-        data = await self.client.post(
-            "/api/v1/file/copy", json={"fileID": file_id, "targetParentID": target_parent_id}
-        )
+        data = await self.client.post("/api/v1/file/copy", json={"fileID": file_id, "targetParentID": target_parent_id})
         return data.get("fileID", 0)
 
     async def download_file(self, file_id: int, save_path: str | Path | None = None) -> bytes | None:
@@ -199,4 +197,3 @@ class FileEndpoint:
             return None
         else:
             return response.content
-

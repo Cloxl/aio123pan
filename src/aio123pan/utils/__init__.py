@@ -33,9 +33,7 @@ def calculate_md5_from_bytes(data: bytes) -> str:
     return hashlib.md5(data).hexdigest()
 
 
-async def read_file_chunks(
-    file_path: str | Path, chunk_size: int = 1024 * 1024 * 4
-) -> AsyncIterator[bytes]:
+async def read_file_chunks(file_path: str | Path, chunk_size: int = 1024 * 1024 * 4) -> AsyncIterator[bytes]:
     """Read file in chunks asynchronously.
 
     Args:
