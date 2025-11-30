@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
+
+jobs:
+  github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          body: |
+            ## 更新内容
+
+            ## 安装
+
+            ```bash
+            pip install aio123pan==${{ github.ref_name }}
+            ```
+
+            ## 使用方法
+
+            ```python
+            from aio123pan import Pan123Client
+
+            async with Pan123Client() as client:
+                # Your code here
+                pass
+            ```
+
+  pypi:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: github-release
+    # Environment and permissions trusted publishing.
+    environment:
+      # Create this environment in the GitHub repository under Settings -> Environments
+      name: release
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      
+      - name: Build package
+        run: uv build
+      
+      # Check that basic features work and we didn't miss to include crucial files
+      - name: Smoke test (wheel)
+        run: |
+          WHEEL_FILE=$(find dist -name "*.whl" -type f)
+          uv run --isolated --no-project -p 3.12 --with "$WHEEL_FILE" -- python -c "from aio123pan import Pan123Client; print('Wheel package works')"
+
+      - name: Smoke test (source distribution)
+        run: |
+          TARBALL_FILE=$(find dist -name "*.tar.gz" -type f)
+          uv run --isolated --no-project -p 3.12 --with "$TARBALL_FILE" -- python -c "from aio123pan import Pan123Client; print('Source distribution works')"
+      
+      - name: Check if version exists on PyPI
+        run: |
+          VERSION=$(echo ${{ github.ref_name }} | sed 's/^v//')
+          if pip index versions aio123pan | grep -q "$VERSION"; then
+            echo "Version $VERSION already exists on PyPI, skipping upload"
+            echo "SKIP_PYPI=true" >> $GITHUB_ENV
+          else
+            echo "Version $VERSION not found on PyPI, proceeding with upload"
+            echo "SKIP_PYPI=false" >> $GITHUB_ENV
+          fi
+      
+      - name: Publish to PyPI
+        if: env.SKIP_PYPI == 'false'
+        run: uv publish --trusted-publishing always
