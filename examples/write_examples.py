@@ -6,6 +6,7 @@ These examples are commented out by default. Uncomment only the ones you want to
 and make sure you understand what they do before executing them.
 """
 
+import asyncio  # noqa: F401
 import secrets
 from pathlib import Path
 
