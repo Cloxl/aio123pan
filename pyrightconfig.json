@@ -9,6 +9,8 @@
     "build",
     "dist"
   ],
+  "venvPath": ".",
+  "venv": ".venv",
   "reportMissingTypeStubs": false,
   "reportUnknownMemberType": false,
   "reportUnknownArgumentType": false,

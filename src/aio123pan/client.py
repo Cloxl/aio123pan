@@ -182,6 +182,9 @@ class Pan123Client:
 
     async def _refresh_token(self) -> None:
         """Refresh access token."""
+        if not self.client_id or not self.client_secret:
+            raise AuthenticationError("Client ID and Secret required for token refresh")
+
         from aio123pan.endpoints.auth import AuthEndpoint
 
         auth = AuthEndpoint(self)
@@ -211,6 +214,9 @@ class Pan123Client:
         headers = kwargs.pop("headers", {})
         if require_auth and self._access_token:
             headers["Authorization"] = f"Bearer {self._access_token}"
+
+        if self._client is None:
+            raise RuntimeError("Client not initialized. Use async context manager.")
 
         try:
             response = await self._client.request(

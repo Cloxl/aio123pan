@@ -35,9 +35,9 @@ async def main():
         client_secret="your_client_secret"
     ) as client:
         # 获取用户信息
-        user_info = await client.user.get_info()
+        user_info = await client.user.get_user_info()
         print(f"用户: {user_info.nickname}")
-        print(f"空间使用: {user_info.space_used / (1024**3):.2f}GB / {user_info.space_capacity / (1024**3):.2f}GB")
+        print(f"空间使用: {user_info.space_used / (1024**3):.2f}GB / {user_info.space_permanent / (1024**3):.2f}GB")
 
         # 列出根目录文件
         file_list = await client.file.list_files(parent_file_id=0)
@@ -191,6 +191,41 @@ client = Pan123Client()
 - 查看回收站文件
 - 恢复文件
 - 彻底删除
+
+## 示例代码
+
+项目提供了两种类型的示例代码：
+
+### 只读示例（安全运行）
+`examples/read_only_examples.py` - 只读取数据，不会修改你的123云盘内容
+
+- 获取用户信息
+- 列出文件
+- 搜索文件
+- 查看回收站
+- 查看存储空间使用情况
+
+```bash
+python examples/read_only_examples.py
+```
+
+### 写操作示例（需要谨慎）
+`examples/write_examples.py` - 会创建、修改或删除数据
+
+⚠️ **警告：这些示例默认全部注释，需要手动取消注释才能运行**
+
+- 创建文件夹
+- 上传文件
+- 重命名/移动/复制文件
+- 删除文件
+- 批量操作
+
+打开文件，取消注释你想运行的示例：
+```python
+# 取消注释你想运行的示例
+# asyncio.run(example_create_folder())
+# asyncio.run(example_upload_file())
+```
 
 ## 开发环境
 

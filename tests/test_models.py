@@ -38,14 +38,14 @@ class TestUserInfo:
         data = {
             "uid": 123456,
             "nickname": "TestUser",
-            "spaceUse": 1024 * 1024 * 100,
-            "spaceCapacity": 1024 * 1024 * 1024 * 10,
+            "spaceUsed": 1024 * 1024 * 100,
+            "spacePermanent": 1024 * 1024 * 1024 * 10,
         }
         user = UserInfo.model_validate(data)
         assert user.user_id == 123456
         assert user.nickname == "TestUser"
         assert user.space_used == 1024 * 1024 * 100
-        assert user.space_capacity == 1024 * 1024 * 1024 * 10
+        assert user.space_permanent == 1024 * 1024 * 1024 * 10
 
 
 class TestFileInfo:
