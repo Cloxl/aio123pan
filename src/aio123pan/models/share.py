@@ -1,6 +1,5 @@
 """Data models for share operations."""
 
-
 from pydantic import BaseModel, ConfigDict, Field
 
 

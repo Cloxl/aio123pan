@@ -72,7 +72,7 @@ class TestClientErrorHandling:
         """Test authentication error is raised."""
         client = Pan123Client(client_id="test", client_secret="test")
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.side_effect = AuthenticationError("Unauthorized", code=401)
 
             async with client:
@@ -84,7 +84,7 @@ class TestClientErrorHandling:
         """Test rate limit error is raised."""
         client = Pan123Client(client_id="test", client_secret="test")
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.side_effect = RateLimitError("Too Many Requests", code=429)
 
             async with client:
@@ -96,7 +96,7 @@ class TestClientErrorHandling:
         """Test resource not found error is raised."""
         client = Pan123Client(client_id="test", client_secret="test")
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.side_effect = ResourceNotFoundError("Not Found", code=404)
 
             async with client:
@@ -189,7 +189,7 @@ class TestNetworkErrors:
         """Test network error is raised on connection failure."""
         client = Pan123Client(client_id="test", client_secret="test")
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.side_effect = NetworkError("Connection failed")
 
             async with client:

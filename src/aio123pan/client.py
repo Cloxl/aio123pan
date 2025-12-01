@@ -279,10 +279,12 @@ class Pan123Client:
             data = response.json()
         except Exception:
             if response.status_code >= 400:
-                return self._handle_response({
-                    "code": response.status_code,
-                    "message": response.text or f"HTTP {response.status_code}",
-                })
+                return self._handle_response(
+                    {
+                        "code": response.status_code,
+                        "message": response.text or f"HTTP {response.status_code}",
+                    }
+                )
             raise NetworkError("Failed to parse response as JSON") from None
 
         if response.status_code >= 400:

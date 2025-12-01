@@ -29,7 +29,7 @@ class TestFileEndpointMock:
             "fileList": [mock_file_data, mock_folder_data],
         }
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = mock_response
             async with client:
                 result = await client.file.list_files(parent_file_id=0)
@@ -46,7 +46,7 @@ class TestFileEndpointMock:
         """Test deleting a file with mock data."""
         client = Pan123Client(client_id="test", client_secret="test")
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = {}
             async with client:
                 result = await client.file.delete_file(123456)
@@ -59,7 +59,7 @@ class TestFileEndpointMock:
         """Test moving a file with mock data."""
         client = Pan123Client(client_id="test", client_secret="test")
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = {}
             async with client:
                 result = await client.file.move_file(123456, 789)
@@ -71,7 +71,7 @@ class TestFileEndpointMock:
         """Test renaming a file with mock data."""
         client = Pan123Client(client_id="test", client_secret="test")
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = {}
             async with client:
                 result = await client.file.rename_file(123456, "new_name.txt")
@@ -92,7 +92,7 @@ class TestShareEndpointMock:
             "shareKey": "abc123",
         }
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = mock_response
             async with client:
                 result = await client.share.create_share(
@@ -111,7 +111,7 @@ class TestShareEndpointMock:
         """Test listing shares with mock data."""
         client = Pan123Client(client_id="test", client_secret="test")
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = mock_share_list_response
             async with client:
                 result = await client.share.list_shares(limit=10)
@@ -133,7 +133,7 @@ class TestDirectLinkEndpointMock:
 
         mock_response = {"filename": "test_folder"}
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = mock_response
             async with client:
                 result = await client.direct_link.enable_direct_link(123456)
@@ -147,7 +147,7 @@ class TestDirectLinkEndpointMock:
 
         mock_response = {"url": "https://123pan.com/dl/abc123"}
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = mock_response
             async with client:
                 result = await client.direct_link.get_direct_link_url(123456)
@@ -161,7 +161,7 @@ class TestDirectLinkEndpointMock:
 
         mock_response = {"filename": "test_folder"}
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = mock_response
             async with client:
                 result = await client.direct_link.disable_direct_link(123456)
@@ -173,7 +173,7 @@ class TestDirectLinkEndpointMock:
         """Test getting IP blacklist with mock data."""
         client = Pan123Client(client_id="test", client_secret="test")
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = mock_ip_blacklist_data
             async with client:
                 result = await client.direct_link.get_ip_blacklist()
@@ -193,7 +193,7 @@ class TestOfflineEndpointMock:
 
         mock_response = {"taskID": 555666}
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = mock_response
             async with client:
                 result = await client.offline.create_download_task(
@@ -208,7 +208,7 @@ class TestOfflineEndpointMock:
         """Test getting download progress with mock data."""
         client = Pan123Client(client_id="test", client_secret="test")
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = mock_offline_task_data
             async with client:
                 result = await client.offline.get_download_progress(555666)
@@ -229,7 +229,7 @@ class TestImageEndpointMock:
 
         mock_response = {"directUrl": "https://img.123pan.com/abc123.png"}
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = mock_response
             async with client:
                 result = await client.image.copy_cloud_image(123456)
@@ -247,7 +247,7 @@ class TestVideoEndpointMock:
 
         mock_response = {"taskID": 777888}
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = mock_response
             async with client:
                 result = await client.video.create_transcode_task(123456)
@@ -259,7 +259,7 @@ class TestVideoEndpointMock:
         """Test getting transcode status with mock data."""
         client = Pan123Client(client_id="test", client_secret="test")
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = mock_video_task_data
             async with client:
                 result = await client.video.get_transcode_status(777888)
@@ -277,7 +277,7 @@ class TestTrashEndpointMock:
         """Test listing trash with mock data."""
         client = Pan123Client(client_id="test", client_secret="test")
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = mock_trash_list_response
             async with client:
                 result = await client.trash.list_trash(limit=10)
@@ -291,7 +291,7 @@ class TestTrashEndpointMock:
         """Test emptying trash with mock data."""
         client = Pan123Client(client_id="test", client_secret="test")
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = {}
             async with client:
                 result = await client.trash.empty_trash()
@@ -309,7 +309,7 @@ class TestFolderEndpointMock:
 
         mock_response = {"dirID": 789012}
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = mock_response
             async with client:
                 result = await client.folder.create_folder(parent_file_id=0, name="test_folder")
@@ -325,7 +325,7 @@ class TestUserEndpointMock:
         """Test getting user info with mock data."""
         client = Pan123Client(client_id="test", client_secret="test")
 
-        with patch.object(client, '_request', new_callable=AsyncMock) as mock_request:
+        with patch.object(client, "_request", new_callable=AsyncMock) as mock_request:
             mock_request.return_value = mock_user_data
             async with client:
                 result = await client.user.get_user_info()

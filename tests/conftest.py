@@ -156,7 +156,14 @@ def mock_direct_link_data():
 @pytest.fixture
 def mock_offline_task_data():
     """Mock offline download task data."""
-    return {"taskID": 555666, "status": 2, "progress": 50, "failReason": "", "fileID": 123456, "url": "https://example.com/file.zip"}
+    return {
+        "taskID": 555666,
+        "status": 2,
+        "progress": 50,
+        "failReason": "",
+        "fileID": 123456,
+        "url": "https://example.com/file.zip",
+    }
 
 
 @pytest.fixture
@@ -231,4 +238,3 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "unit: unit tests for individual components")
     config.addinivalue_line("markers", "integration: integration tests requiring API access")
     config.addinivalue_line("markers", "mock: tests using mocked API responses")
-
