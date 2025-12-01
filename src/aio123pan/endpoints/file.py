@@ -6,6 +6,7 @@ from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from aio123pan.exceptions import DownloadError
 from aio123pan.models.file import FileInfo, FileListResponse
 
 if TYPE_CHECKING:
@@ -182,7 +183,7 @@ class FileEndpoint:
         download_url = download_info.get("downloadUrl")
 
         if not download_url:
-            raise ValueError("No download URL available")
+            raise DownloadError("No download URL available")
 
         await self.client._ensure_client()
 
@@ -192,11 +193,11 @@ class FileEndpoint:
         response = await self.client._client.get(download_url, follow_redirects=True)
         response.raise_for_status()
 
-        if save_path:
-            save_path = Path(save_path)
-            save_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(save_path, "wb") as f:
-                f.write(response.content)
-            return None
-        else:
+        if save_path is None:
             return response.content
+
+        save_path = Path(save_path)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(save_path, "wb") as f:
+            f.write(response.content)
+        return None
