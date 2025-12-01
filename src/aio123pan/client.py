@@ -10,11 +10,16 @@ import httpx
 
 if TYPE_CHECKING:
     from aio123pan.endpoints.auth import AuthEndpoint
+    from aio123pan.endpoints.direct_link import DirectLinkEndpoint
     from aio123pan.endpoints.file import FileEndpoint
     from aio123pan.endpoints.folder import FolderEndpoint
+    from aio123pan.endpoints.image import ImageEndpoint
+    from aio123pan.endpoints.offline import OfflineEndpoint
+    from aio123pan.endpoints.share import ShareEndpoint
     from aio123pan.endpoints.trash import TrashEndpoint
     from aio123pan.endpoints.upload import UploadEndpoint
     from aio123pan.endpoints.user import UserEndpoint
+    from aio123pan.endpoints.video import VideoEndpoint
 
 from aio123pan.config import get_settings
 from aio123pan.constants import CONTENT_TYPE, PLATFORM
@@ -79,6 +84,11 @@ class Pan123Client:
         self._folder_endpoint = None
         self._upload_endpoint = None
         self._trash_endpoint = None
+        self._share_endpoint = None
+        self._offline_endpoint = None
+        self._image_endpoint = None
+        self._direct_link_endpoint = None
+        self._video_endpoint = None
 
     async def __aenter__(self) -> Pan123Client:
         """Async context manager entry."""
@@ -142,6 +152,51 @@ class Pan123Client:
 
             self._trash_endpoint = TrashEndpoint(self)
         return self._trash_endpoint
+
+    @property
+    def share(self) -> ShareEndpoint:
+        """Get share endpoint."""
+        if self._share_endpoint is None:
+            from aio123pan.endpoints.share import ShareEndpoint
+
+            self._share_endpoint = ShareEndpoint(self)
+        return self._share_endpoint
+
+    @property
+    def offline(self) -> OfflineEndpoint:
+        """Get offline download endpoint."""
+        if self._offline_endpoint is None:
+            from aio123pan.endpoints.offline import OfflineEndpoint
+
+            self._offline_endpoint = OfflineEndpoint(self)
+        return self._offline_endpoint
+
+    @property
+    def image(self) -> ImageEndpoint:
+        """Get image hosting endpoint."""
+        if self._image_endpoint is None:
+            from aio123pan.endpoints.image import ImageEndpoint
+
+            self._image_endpoint = ImageEndpoint(self)
+        return self._image_endpoint
+
+    @property
+    def direct_link(self) -> DirectLinkEndpoint:
+        """Get direct link endpoint."""
+        if self._direct_link_endpoint is None:
+            from aio123pan.endpoints.direct_link import DirectLinkEndpoint
+
+            self._direct_link_endpoint = DirectLinkEndpoint(self)
+        return self._direct_link_endpoint
+
+    @property
+    def video(self) -> VideoEndpoint:
+        """Get video transcoding endpoint."""
+        if self._video_endpoint is None:
+            from aio123pan.endpoints.video import VideoEndpoint
+
+            self._video_endpoint = VideoEndpoint(self)
+        return self._video_endpoint
 
     async def _ensure_client(self) -> None:
         """Ensure httpx client is initialized."""
@@ -217,18 +272,48 @@ class Pan123Client:
             response = await self._client.request(
                 method=method, url=path, json=json, params=params, headers=headers, **kwargs
             )
-            response.raise_for_status()
-        except httpx.HTTPError as e:
+        except httpx.RequestError as e:
             raise NetworkError(f"Network error: {e}") from e
 
-        data = response.json()
+        try:
+            data = response.json()
+        except Exception:
+            if response.status_code >= 400:
+                return self._handle_response({
+                    "code": response.status_code,
+                    "message": response.text or f"HTTP {response.status_code}",
+                })
+            raise NetworkError("Failed to parse response as JSON") from None
+
+        if response.status_code >= 400:
+            return self._handle_response({"code": response.status_code, "message": data.get("message", response.text)})
+
         return self._handle_response(data)
 
     def _handle_response(self, data: JSONDict) -> JSONDict:
         """Handle API response and raise appropriate exceptions."""
+        from aio123pan.exceptions import (
+            FileNotFoundError,
+            GatewayTimeoutError,
+            InsufficientStorageError,
+            InternalServerError,
+            InvalidCredentialsError,
+            PermissionDeniedError,
+            QPSLimitError,
+            QuotaExceededError,
+            ResourceNotFoundError,
+            ServerError,
+            ServiceUnavailableError,
+            ShareNotFoundError,
+            TaskNotFoundError,
+            TokenExpiredError,
+            TokenLimitExceededError,
+        )
+
         code = data.get("code", -1)
         message = data.get("message", "Unknown error")
         trace_id = data.get("x-traceID")
+        message_lower = message.lower()
 
         if code == 0:
             return data.get("data", {})
@@ -238,10 +323,47 @@ class Pan123Client:
             self._expired_at = None
             if self._token_storage:
                 self._token_storage.clear()
+
+            if "expired" in message_lower:
+                raise TokenExpiredError(message, code=code, trace_id=trace_id)
+            if "invalid" in message_lower and ("client" in message_lower or "credential" in message_lower):
+                raise InvalidCredentialsError(message, code=code, trace_id=trace_id)
+            if "token" in message_lower and "exceeded" in message_lower:
+                raise TokenLimitExceededError(message, code=code, trace_id=trace_id)
+
             raise AuthenticationError(message, code=code, trace_id=trace_id)
 
+        if code == 403:
+            raise PermissionDeniedError(message, code=code, trace_id=trace_id)
+
+        if code == 404:
+            if "file" in message_lower:
+                raise FileNotFoundError(message, code=code, trace_id=trace_id)
+            if "share" in message_lower:
+                raise ShareNotFoundError(message, code=code, trace_id=trace_id)
+            if "task" in message_lower:
+                raise TaskNotFoundError(message, code=code, trace_id=trace_id)
+            raise ResourceNotFoundError(message, code=code, trace_id=trace_id)
+
         if code == 429:
+            if "qps" in message_lower:
+                raise QPSLimitError(message, code=code, trace_id=trace_id)
             raise RateLimitError(message, code=code, trace_id=trace_id)
+
+        if code >= 500:
+            if code == 500:
+                raise InternalServerError(message, code=code, trace_id=trace_id)
+            if code == 503:
+                raise ServiceUnavailableError(message, code=code, trace_id=trace_id)
+            if code == 504:
+                raise GatewayTimeoutError(message, code=code, trace_id=trace_id)
+            raise ServerError(message, code=code, trace_id=trace_id)
+
+        if "storage" in message_lower or "space" in message_lower:
+            if "insufficient" in message_lower or "not enough" in message_lower:
+                raise InsufficientStorageError(message, code=code, trace_id=trace_id)
+            if "quota" in message_lower or "exceed" in message_lower:
+                raise QuotaExceededError(message, code=code, trace_id=trace_id)
 
         raise APIError(message, code=code, trace_id=trace_id)
 
