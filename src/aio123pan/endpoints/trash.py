@@ -24,6 +24,9 @@ class TrashEndpoint:
     ) -> FileListResponse:
         """List files in trash.
 
+        Note: 123Pan does not have a dedicated trash list API.
+        This method uses the regular file list API and filters by trashed=1.
+
         Args:
             limit: Number of files per page, max 100
             last_file_id: Pagination parameter from previous response
@@ -31,14 +34,25 @@ class TrashEndpoint:
         Returns:
             FileListResponse containing trashed files
         """
-        params = {
+        from aio123pan.validators import validate_page_limit
+
+        validate_page_limit(limit)
+
+        params: dict[str, int] = {
+            "parentFileId": 0,
             "limit": limit,
         }
         if last_file_id is not None:
             params["lastFileId"] = last_file_id
 
-        data = await self.client.get("/api/v1/file/trash/list", params=params)
-        return FileListResponse.model_validate(data)
+        # Use v2 file list API and filter by trashed field
+        data = await self.client.get("/api/v2/file/list", params=params)
+        response = FileListResponse.model_validate(data)
+
+        # Filter only trashed files
+        response.file_list = [f for f in response.file_list if f.trashed]
+
+        return response
 
     async def list_all_trash(self, limit: int = 100) -> AsyncIterator[FileInfo]:
         """List all trashed files with automatic pagination.
