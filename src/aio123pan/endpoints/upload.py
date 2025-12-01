@@ -92,23 +92,45 @@ class UploadEndpoint:
         """
         await self.client._ensure_client()
 
-        files = {"slice": (f"slice_{slice_no}", slice_data, "application/octet-stream")}
-        data = {
-            "preuploadID": preupload_id,
-            "sliceMD5": slice_md5,
-            "sliceNo": str(slice_no),
-        }
+        # Manually construct multipart/form-data body like official Python example
+        import uuid
+
+        boundary = uuid.uuid4().hex
+        parts = []
+
+        # Add form fields
+        for field_name, field_value in [
+            ("preuploadID", preupload_id),
+            ("sliceNo", str(slice_no)),
+            ("sliceMD5", slice_md5),
+        ]:
+            parts.append(f"--{boundary}\r\n".encode())
+            parts.append(f'Content-Disposition: form-data; name="{field_name}"\r\n\r\n'.encode())
+            parts.append(f"{field_value}\r\n".encode())
+
+        # Add file field
+        parts.append(f"--{boundary}\r\n".encode())
+        parts.append(f'Content-Disposition: form-data; name="slice"; filename="slice_{slice_no}"\r\n'.encode())
+        parts.append(b"Content-Type: application/octet-stream\r\n\r\n")
+        parts.append(slice_data)
+        parts.append(b"\r\n")
+        parts.append(f"--{boundary}--\r\n".encode())
+
+        body = b"".join(parts)
 
         headers = {
             "Platform": "open_platform",
+            "Content-Type": f"multipart/form-data; boundary={boundary}",
         }
         if self.client._access_token:
             headers["Authorization"] = f"Bearer {self.client._access_token}"
 
+        if self.client._client is None:
+            raise RuntimeError("HTTP client not initialized")
+
         response = await self.client._client.post(
             f"{server}/upload/v2/file/slice",
-            files=files,
-            data=data,
+            content=body,
             headers=headers,
         )
         response.raise_for_status()
@@ -129,7 +151,7 @@ class UploadEndpoint:
             UploadCompleteResponse with completion status
         """
         data = await self.client.post(
-            "/upload/v2/file/upload/complete",
+            "/upload/v2/file/upload_complete",  # Fixed: upload_complete not upload/complete
             json={"preuploadID": preupload_id},
         )
         return UploadCompleteResponse.model_validate(data)
@@ -211,11 +233,19 @@ class UploadEndpoint:
 
         max_retries = 10
         for attempt in range(max_retries):  # noqa: B007
-            complete_response = await self.upload_complete(create_response.preupload_id)
+            try:
+                complete_response = await self.upload_complete(create_response.preupload_id)
 
-            if complete_response.completed and complete_response.file_id:
-                return complete_response.file_id
+                if complete_response.completed and complete_response.file_id:
+                    return complete_response.file_id
 
-            await asyncio.sleep(1)
+                await asyncio.sleep(1)
+            except Exception as e:
+                # Handle file verification in progress error (code: 20103)
+                error_msg = str(e)
+                if "校验中" in error_msg or "20103" in error_msg:
+                    await asyncio.sleep(1)
+                    continue
+                raise
 
         raise Exception(f"Upload completion timed out after {max_retries} attempts")
