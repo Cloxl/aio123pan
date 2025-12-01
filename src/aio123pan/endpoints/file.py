@@ -42,7 +42,7 @@ class FileEndpoint:
 
         validate_page_limit(limit)
 
-        params = {
+        params: dict[str, int | str] = {
             "parentFileId": parent_file_id,
             "limit": limit,
         }
@@ -178,15 +178,18 @@ class FileEndpoint:
         Returns:
             File bytes if save_path is None, otherwise None
         """
-        download_info = await self.client.get("/api/v1/file/download_info", params={"fileID": file_id})
-        download_url = download_info.get("DownloadURL")
+        download_info = await self.client.get("/api/v1/file/download_info", params={"fileId": file_id})
+        download_url = download_info.get("downloadUrl")
 
         if not download_url:
             raise ValueError("No download URL available")
 
         await self.client._ensure_client()
 
-        response = await self.client._client.get(download_url)
+        if self.client._client is None:
+            raise RuntimeError("HTTP client not initialized")
+
+        response = await self.client._client.get(download_url, follow_redirects=True)
         response.raise_for_status()
 
         if save_path:
