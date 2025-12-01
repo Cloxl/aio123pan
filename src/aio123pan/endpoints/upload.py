@@ -7,6 +7,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from aio123pan.exceptions import UploadError
 from aio123pan.models.upload import CreateFileResponse, UploadCompleteResponse, UploadDomainResponse
 from aio123pan.utils import calculate_md5, calculate_md5_from_bytes
 
@@ -137,7 +138,7 @@ class UploadEndpoint:
 
         result = response.json()
         if result.get("code") != 0:
-            raise Exception(f"Upload slice failed: {result.get('message')}")
+            raise UploadError(f"Upload slice failed: {result.get('message')}")
 
         return True
 
@@ -201,7 +202,7 @@ class UploadEndpoint:
             return create_response.file_id or 0
 
         if not create_response.preupload_id or not create_response.slice_size:
-            raise Exception("Invalid upload response: missing preupload_id or slice_size")
+            raise UploadError("Invalid upload response: missing preupload_id or slice_size")
 
         slice_size = create_response.slice_size
         server = create_response.servers[0] if create_response.servers else "https://open-api.123pan.com"
@@ -232,7 +233,7 @@ class UploadEndpoint:
                 slice_no += 1
 
         max_retries = 10
-        for attempt in range(max_retries):  # noqa: B007
+        for _ in range(max_retries):
             try:
                 complete_response = await self.upload_complete(create_response.preupload_id)
 
@@ -248,4 +249,4 @@ class UploadEndpoint:
                     continue
                 raise
 
-        raise Exception(f"Upload completion timed out after {max_retries} attempts")
+        raise UploadError(f"Upload completion timed out after {max_retries} attempts")
