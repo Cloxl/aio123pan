@@ -95,11 +95,17 @@ class FileEndpoint:
     async def get_file_info(self, file_id: int) -> FileInfo:
         """Get file information by ID.
 
+        Note: This API may return 404 and require special account permissions.
+        Consider using list_files() to get file information instead.
+
         Args:
             file_id: File ID
 
         Returns:
             FileInfo object
+
+        Raises:
+            ResourceNotFoundError: If API endpoint is not available
         """
         data = await self.client.get("/api/v1/file/info", params={"fileID": file_id})
         return FileInfo.model_validate(data)
@@ -159,12 +165,17 @@ class FileEndpoint:
     async def copy_file(self, file_id: int, target_parent_id: int) -> int:
         """Copy a file or folder.
 
+        Note: This API may return 404 and require special account permissions.
+
         Args:
             file_id: File ID to copy
             target_parent_id: Target parent folder ID
 
         Returns:
             New file ID
+
+        Raises:
+            ResourceNotFoundError: If API endpoint is not available
         """
         data = await self.client.post("/api/v1/file/copy", json={"fileID": file_id, "targetParentID": target_parent_id})
         return data.get("fileID", 0)

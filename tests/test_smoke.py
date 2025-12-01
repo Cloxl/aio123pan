@@ -104,6 +104,36 @@ class TestClientEndpoints:
         assert client.trash is not None
         assert client.trash is client.trash
 
+    def test_share_endpoint(self):
+        """Test share endpoint property."""
+        client = Pan123Client()
+        assert client.share is not None
+        assert client.share is client.share
+
+    def test_direct_link_endpoint(self):
+        """Test direct_link endpoint property."""
+        client = Pan123Client()
+        assert client.direct_link is not None
+        assert client.direct_link is client.direct_link
+
+    def test_offline_endpoint(self):
+        """Test offline endpoint property."""
+        client = Pan123Client()
+        assert client.offline is not None
+        assert client.offline is client.offline
+
+    def test_image_endpoint(self):
+        """Test image endpoint property."""
+        client = Pan123Client()
+        assert client.image is not None
+        assert client.image is client.image
+
+    def test_video_endpoint(self):
+        """Test video endpoint property."""
+        client = Pan123Client()
+        assert client.video is not None
+        assert client.video is client.video
+
 
 class TestExceptionHandling:
     """Test exception imports and inheritance."""
