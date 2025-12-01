@@ -3,18 +3,15 @@
 import re
 from pathlib import Path
 
-
-class ValidationError(Exception):
-    """Validation error exception."""
-
+from aio123pan.exceptions import ValidationError
 
 MAX_FILENAME_LENGTH = 255
 INVALID_FILENAME_CHARS = r'"\/:*?|><'
 INVALID_FILENAME_PATTERN = re.compile(f"[{re.escape(INVALID_FILENAME_CHARS)}]")
 
 MAX_FILE_SIZE = 10 * 1024 * 1024 * 1024
-
 MAX_BATCH_SIZE = 100
+MAX_PAGE_LIMIT = 100
 
 
 def validate_filename(filename: str) -> None:
@@ -37,7 +34,7 @@ def validate_filename(filename: str) -> None:
     if len(filename) > MAX_FILENAME_LENGTH:
         raise ValidationError(f"Filename must be less than {MAX_FILENAME_LENGTH + 1} characters")
 
-    if filename.strip() == "":
+    if not filename.strip():
         raise ValidationError("Filename cannot be all spaces")
 
     if INVALID_FILENAME_PATTERN.search(filename):
@@ -110,5 +107,5 @@ def validate_page_limit(limit: int) -> None:
     if limit <= 0:
         raise ValidationError("Limit must be greater than 0")
 
-    if limit > 100:
-        raise ValidationError("Limit cannot exceed 100")
+    if limit > MAX_PAGE_LIMIT:
+        raise ValidationError(f"Limit cannot exceed {MAX_PAGE_LIMIT}")

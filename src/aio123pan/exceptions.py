@@ -37,3 +37,11 @@ class NetworkError(Pan123Error):
 
 class ValidationError(Pan123Error):
     """Request validation error."""
+
+
+class UploadError(Pan123Error):
+    """Upload operation error."""
+
+
+class DownloadError(Pan123Error):
+    """Download operation error."""

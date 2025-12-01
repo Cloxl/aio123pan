@@ -4,10 +4,13 @@ from aio123pan.client import Pan123Client
 from aio123pan.exceptions import (
     APIError,
     AuthenticationError,
+    DownloadError,
+    NetworkError,
     Pan123Error,
     RateLimitError,
+    UploadError,
+    ValidationError,
 )
-from aio123pan.validators import ValidationError
 
 try:
     from aio123pan._version import __version__, __version_tuple__
@@ -22,6 +25,9 @@ __all__ = [
     "AuthenticationError",
     "RateLimitError",
     "ValidationError",
+    "NetworkError",
+    "UploadError",
+    "DownloadError",
     "__version__",
     "__version_tuple__",
 ]
