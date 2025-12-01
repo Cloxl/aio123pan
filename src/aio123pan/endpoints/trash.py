@@ -78,11 +78,16 @@ class TrashEndpoint:
     async def restore_file(self, file_id: int) -> bool:
         """Restore a file from trash.
 
+        Note: This API may return 404 and require special account permissions.
+
         Args:
             file_id: File ID to restore
 
         Returns:
             True if restoration was successful
+
+        Raises:
+            ResourceNotFoundError: If API endpoint is not available
         """
         await self.client.post("/api/v1/file/trash/restore", json={"fileID": file_id})
         return True
@@ -90,11 +95,16 @@ class TrashEndpoint:
     async def delete_permanently(self, file_id: int) -> bool:
         """Permanently delete a file from trash.
 
+        Note: This API may return 404 and require special account permissions.
+
         Args:
             file_id: File ID to delete permanently
 
         Returns:
             True if deletion was successful
+
+        Raises:
+            ResourceNotFoundError: If API endpoint is not available
         """
         await self.client.post("/api/v1/file/trash/delete", json={"fileID": file_id})
         return True
