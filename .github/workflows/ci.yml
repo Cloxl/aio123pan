@@ -36,7 +36,15 @@ jobs:
     
     - name: Run tests
       run: |
-        uv run pytest tests/ -v --tb=short
+        uv run pytest tests/ -v --tb=short --cov=aio123pan --cov-report=xml --cov-report=term-missing
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
     
     - name: Run linting and type checking
       run: |

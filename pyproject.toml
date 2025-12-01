@@ -22,7 +22,11 @@ classifiers = [
     "Topic :: Security :: Cryptography",
     "Typing :: Typed",
 ]
-dependencies = []
+dependencies = [
+    "httpx>=0.28.1",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -50,6 +54,19 @@ version-file = "src/aio123pan/_version.py"
 testpaths = ["tests"]
 pythonpath = ["src"]
 asyncio_mode = "auto"
+markers = [
+    "smoke: smoke tests for basic functionality",
+    "unit: unit tests for individual components",
+    "integration: integration tests requiring API access",
+]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+    "--cov=aio123pan",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+]
 
 [tool.black]
 line-length = 120
@@ -84,5 +101,6 @@ indent-style = "space"
 dev = [
     "pytest>=8.4.1",
     "pytest-asyncio>=1.1.0",
+    "pytest-cov>=6.0.0",
     "ruff>=0.12.4",
 ]
