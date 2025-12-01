@@ -65,14 +65,9 @@ class Pan123Client:
         if access_token and expired_at:
             self._access_token = access_token
             self._expired_at = expired_at
-        elif self._token_storage:
-            token_data = self._token_storage.load()
-            if token_data:
-                self._access_token = token_data.access_token
-                self._expired_at = token_data.expired_at
-            else:
-                self._access_token = None
-                self._expired_at = None
+        elif self._token_storage and (token_data := self._token_storage.load()):
+            self._access_token = token_data.access_token
+            self._expired_at = token_data.expired_at
         else:
             self._access_token = None
             self._expired_at = None
